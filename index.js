@@ -38,6 +38,22 @@ app.post("/register", async (req, res) => {
     res.status(422).json(error);
   }
 });
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const passwordMatch = bcrypt.compareSync(password, user.password);
+    if (passwordMatch) {
+      res.json(user);
+    } else {
+      res.status(401).json("Invalid credentials");
+    }
+  } else {
+    res.status(404).json("User not found");
+  }
+});
 //hJ38ntZRxdncbh9F
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
