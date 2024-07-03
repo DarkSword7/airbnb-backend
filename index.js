@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import User from "./models/User.js";
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
+//register new user and save to database
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -38,7 +40,7 @@ app.post("/register", async (req, res) => {
     res.status(422).json(error);
   }
 });
-
+//login user and check if user exists in database
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -46,7 +48,15 @@ app.post("/login", async (req, res) => {
   if (user) {
     const passwordMatch = bcrypt.compareSync(password, user.password);
     if (passwordMatch) {
-      res.json(user);
+      jwt.sign(
+        { email: user.email, id: user._id },
+        process.env.JWT_SECRET,
+        {},
+        (err, token) => {
+          if (err) throw err;
+          res.cookie("token", token).json("User logged in");
+        }
+      );
     } else {
       res.status(401).json("Invalid credentials");
     }
