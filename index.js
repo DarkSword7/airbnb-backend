@@ -79,6 +79,10 @@ app.get("/profile", (req, res) => {
     res.status(401).json("Unauthorized");
   }
 });
+
+app.post("/logout", (req, res) => {
+  res.cookie("token", "").json("Logged out");
+});
 //hJ38ntZRxdncbh9F
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
