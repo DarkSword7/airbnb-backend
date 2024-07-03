@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "./models/User.js";
@@ -9,6 +10,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
@@ -54,7 +56,7 @@ app.post("/login", async (req, res) => {
         {},
         (err, token) => {
           if (err) throw err;
-          res.cookie("token", token).json("User logged in");
+          res.cookie("token", token).json(user);
         }
       );
     } else {
@@ -62,6 +64,19 @@ app.post("/login", async (req, res) => {
     }
   } else {
     res.status(404).json("User not found");
+  }
+});
+
+app.get("/profile", (req, res) => {
+  const { token } = req.cookies;
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, {}, async (err, userData) => {
+      if (err) throw err;
+      const { name, email, _id } = await User.findById(userData.id);
+      res.json({ name, email, _id });
+    });
+  } else {
+    res.status(401).json("Unauthorized");
   }
 });
 //hJ38ntZRxdncbh9F
