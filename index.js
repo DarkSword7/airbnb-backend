@@ -4,13 +4,21 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import bcrypt from "bcryptjs";
+import download from "image-downloader";
 import jwt from "jsonwebtoken";
+import multer from "multer";
+import { fileURLToPath } from "url";
+import path from "path";
+import fs from "fs";
 import User from "./models/User.js";
 dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(
   cors({
     credentials: true,
@@ -66,7 +74,7 @@ app.post("/login", async (req, res) => {
     res.status(404).json("User not found");
   }
 });
-
+//get user profile
 app.get("/profile", (req, res) => {
   const { token } = req.cookies;
   if (token) {
@@ -82,6 +90,31 @@ app.get("/profile", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json("Logged out");
+});
+//upload image to server
+app.post("/upload-by-link", async (req, res) => {
+  const { link } = req.body;
+  const newName = "photo" + Date.now() + ".jpg";
+  await download.image({
+    url: link,
+    dest: __dirname + "/uploads/" + newName,
+  });
+  res.json(newName);
+});
+
+const photosMiddleware = multer({ dest: "uploads/" });
+
+app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
+  const uploadedFiles = [];
+  for (let i = 0; i < req.files.length; i++) {
+    const { path, originalname } = req.files[i];
+    const parts = originalname.split(".");
+    const extension = parts[parts.length - 1];
+    const newPath = path + "." + extension;
+    fs.renameSync(path, newPath);
+    uploadedFiles.push(newPath.replace("uploads\\", ""));
+  }
+  res.json(uploadedFiles);
 });
 //hJ38ntZRxdncbh9F
 app.listen(PORT, () => {
