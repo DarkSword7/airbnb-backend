@@ -11,6 +11,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 import fs from "fs";
 import User from "./models/User.js";
+import Place from "./models/Place.js";
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -115,6 +116,37 @@ app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
     uploadedFiles.push(newPath.replace("uploads\\", ""));
   }
   res.json(uploadedFiles);
+});
+
+app.post("/add-place", (req, res) => {
+  const { token } = req.cookies;
+  const {
+    title,
+    address,
+    addedPhotos,
+    description,
+    perks,
+    extraInfo,
+    checkIn,
+    checkOut,
+    maxGuests,
+  } = req.body;
+  jwt.verify(token, process.env.JWT_SECRET, {}, async (err, userData) => {
+    if (err) throw err;
+    const place = await Place.create({
+      owner: userData.id,
+      title,
+      address,
+      photos: addedPhotos,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+    });
+    res.json(place);
+  });
 });
 //hJ38ntZRxdncbh9F
 app.listen(PORT, () => {
