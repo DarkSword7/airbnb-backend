@@ -104,7 +104,7 @@ app.post("/upload-by-link", async (req, res) => {
 });
 
 const photosMiddleware = multer({ dest: "uploads/" });
-
+//upload multiple images to server
 app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
   const uploadedFiles = [];
   for (let i = 0; i < req.files.length; i++) {
@@ -117,7 +117,7 @@ app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
   }
   res.json(uploadedFiles);
 });
-
+//add new place to database
 app.post("/add-place", (req, res) => {
   const { token } = req.cookies;
   const {
@@ -148,7 +148,7 @@ app.post("/add-place", (req, res) => {
     res.json(place);
   });
 });
-
+//show all places
 app.get("/places", (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, process.env.JWT_SECRET, {}, async (err, userData) => {
@@ -157,11 +157,48 @@ app.get("/places", (req, res) => {
     res.json(places);
   });
 });
-
+//show place by id
 app.get("/places/:id", async (req, res) => {
   const { id } = req.params;
   const placeById = await Place.findById(id);
   res.json(placeById);
+});
+
+//update place by id
+app.put("/places", (req, res) => {
+  const { token } = req.cookies;
+  const {
+    id,
+    title,
+    address,
+    addedPhotos,
+    description,
+    perks,
+    extraInfo,
+    checkIn,
+    checkOut,
+    maxGuests,
+  } = req.body;
+  jwt.verify(token, process.env.JWT_SECRET, {}, async (err, userData) => {
+    if (err) throw err;
+    const place = await Place.findById(id);
+
+    if (userData.id === place.owner.toString()) {
+      place.set({
+        title,
+        address,
+        photos: addedPhotos,
+        description,
+        perks,
+        extraInfo,
+        checkIn,
+        checkOut,
+        maxGuests,
+      });
+      await place.save();
+      res.json("Place updated");
+    }
+  });
 });
 //hJ38ntZRxdncbh9F
 app.listen(PORT, () => {
