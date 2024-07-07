@@ -148,6 +148,21 @@ app.post("/add-place", (req, res) => {
     res.json(place);
   });
 });
+
+app.get("/places", (req, res) => {
+  const { token } = req.cookies;
+  jwt.verify(token, process.env.JWT_SECRET, {}, async (err, userData) => {
+    const { id } = userData;
+    const places = await Place.find({ owner: id });
+    res.json(places);
+  });
+});
+
+app.get("/places/:id", async (req, res) => {
+  const { id } = req.params;
+  const placeById = await Place.findById(id);
+  res.json(placeById);
+});
 //hJ38ntZRxdncbh9F
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
