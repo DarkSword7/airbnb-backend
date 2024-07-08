@@ -148,8 +148,14 @@ app.post("/add-place", (req, res) => {
     res.json(place);
   });
 });
-//show all places
-app.get("/places", (req, res) => {
+//get all places from database
+app.get("/places", async (req, res) => {
+  const places = await Place.find();
+  res.json(places);
+});
+
+// get all places from database with owner id
+app.get("/user-places", (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, process.env.JWT_SECRET, {}, async (err, userData) => {
     const { id } = userData;
