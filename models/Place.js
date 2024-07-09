@@ -28,7 +28,6 @@ const placeSchema = new Schema(
     },
     extraInfo: {
       type: String,
-      required: true,
     },
     checkIn: {
       type: Number,
@@ -39,6 +38,10 @@ const placeSchema = new Schema(
       required: true,
     },
     maxGuests: {
+      type: Number,
+      required: true,
+    },
+    price: {
       type: Number,
       required: true,
     },
