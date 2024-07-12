@@ -12,6 +12,7 @@ import path from "path";
 import fs from "fs";
 import User from "./models/User.js";
 import Place from "./models/Place.js";
+import Booking from "./models/Booking.js";
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -209,6 +210,25 @@ app.put("/places", (req, res) => {
       res.json("Place updated");
     }
   });
+});
+
+app.post("/booking", (req, res) => {
+  const { place, checkIn, checkOut, numGuests, name, phone, price } = req.body;
+  Booking.create({
+    place,
+    checkIn,
+    checkOut,
+    numGuests,
+    name,
+    phone,
+    price,
+  })
+    .then((doc) => {
+      res.json(doc);
+    })
+    .catch((err) => {
+      res.status(400).json(err);
+    });
 });
 //hJ38ntZRxdncbh9F
 app.listen(PORT, () => {
