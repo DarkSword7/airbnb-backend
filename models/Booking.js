@@ -4,6 +4,11 @@ import { Schema } from "mongoose";
 const bookingSchema = new Schema({
   place: {
     type: Schema.Types.ObjectId,
+    ref: "Place",
+    required: true,
+  },
+  user: {
+    type: Schema.Types.ObjectId,
     required: true,
   },
   checkIn: {

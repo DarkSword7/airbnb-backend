@@ -32,6 +32,20 @@ const PORT = process.env.PORT || 3000;
 
 await mongoose.connect(process.env.MONGO_URL);
 
+function getUserDataFromReq(req) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      req.cookies.token,
+      process.env.JWT_SECRET,
+      {},
+      async (err, userData) => {
+        if (err) reject(err);
+        resolve(userData);
+      }
+    );
+  });
+}
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
@@ -212,7 +226,8 @@ app.put("/places", (req, res) => {
   });
 });
 
-app.post("/booking", (req, res) => {
+app.post("/bookings", async (req, res) => {
+  const userData = await getUserDataFromReq(req);
   const { place, checkIn, checkOut, numGuests, name, phone, price } = req.body;
   Booking.create({
     place,
@@ -222,6 +237,7 @@ app.post("/booking", (req, res) => {
     name,
     phone,
     price,
+    user: userData.id,
   })
     .then((doc) => {
       res.json(doc);
@@ -229,6 +245,12 @@ app.post("/booking", (req, res) => {
     .catch((err) => {
       res.status(400).json(err);
     });
+});
+
+app.get("/bookings", async (req, res) => {
+  const userData = await getUserDataFromReq(req);
+  const bookings = await Booking.find({ user: userData.id }).populate("place");
+  res.json(bookings);
 });
 //hJ38ntZRxdncbh9F
 app.listen(PORT, () => {
