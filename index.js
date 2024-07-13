@@ -21,7 +21,12 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://airbnb-client-beta.vercel.app",
+    credentials: true,
+  })
+);
 
 const PORT = process.env.PORT || 3000;
 
