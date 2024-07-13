@@ -21,12 +21,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
-app.use(
-  cors({
-    credentials: true,
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-  })
-);
+app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
