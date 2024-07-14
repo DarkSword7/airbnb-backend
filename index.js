@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(
   cors({
-    origin: "https://airbnb-client-beta.vercel.app",
+    origin: ["https://airbnb-client-beta.vercel.app", "http://localhost:5173"],
     credentials: true,
   })
 );
@@ -80,7 +80,12 @@ app.post("/login", async (req, res) => {
         {},
         (err, token) => {
           if (err) throw err;
-          res.cookie("token", token).json(user);
+          res
+            .cookie("token", token, {
+              sameSite: "none",
+              secure: true,
+            })
+            .json(user);
         }
       );
     } else {
